@@ -23,3 +23,91 @@ A few things make it so delightful:
 
 Want me to pull up a few videos or images of pandas sliding in snow?
 ###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+Do not code anything in for me. I'm building a stock market simulator using the massive.com stock market api. How can I begin to flesh this out, and are there any important first steps that I should consider
+
+Response:
+
+Here's a roadmap, no code.
+
+Before writing anything:
+1. Read the Massive API docs. Check authentication and key storage, rate limits and data delays, available endpoints, response formats, and error codes.
+2. Decide whether the simulator is paper trading or historical replay/backtesting. Historical replay is easier to start with because it is deterministic and needs fewer API calls.
+3. Check the assignment requirements so the project scope fits the rubric.
+
+Suggested first steps:
+1. Get an API key and make one manual request to inspect the raw JSON.
+2. Store the key in an environment variable; do not hardcode or commit it.
+3. Make a thin data layer to handle API calls, errors, and rate limits.
+4. Cache responses locally so development can continue offline and API calls are limited.
+5. Plan the portfolio model: cash, positions, orders, and transaction history.
+6. Choose a simple interface, such as a command-line menu.
+7. Build incrementally: fetch a price, buy, sell, show portfolio value, then save and load state.
+
+Consider separation of concerns, invalid tickers, market closures, missing data, network failures, fractional shares, insufficient funds, precise money handling, persistence, mocked API tests, and whether to model slippage, commissions, or order types. Keep realism features out of the first version.
+
+Next, decide your API plan tier and whether you want live paper trading or historical replay.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+Line 18; what coordinates should i use to center my rectangle at the center of the screen below the text at the top
+
+The attached code had a drawRect() call and used CMU Graphics.
+
+Response:
+
+In CMU Graphics, drawRect takes the rectangle's left, top, width, and height. With the default 400-by-400 window, use:
+
+drawRect(100, 120, 200, 150, fill='green')
+
+That centers it horizontally and places it below the text at y=50. app.sqSize = 1000 does not change the window size.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+When i clicked my button, i got this error, what does this mean, and/ how can i move forward with fixing this
+
+Response:
+
+I don't see the error message or screenshot attached. The click handler in main.py looked like a likely source: CMU Graphics screen event handlers receive app first, followed by the mouse coordinates. The handler only accepted the two coordinates. If the error mentions an argument-count mismatch, add app before mouseX and mouseY, then try again. If it still fails, share the full traceback; its final lines usually identify the failing code and explain why.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+TypeError: start_onMousePress() takes 2 positional arguments but 3 were given
+
+Response:
+
+This means the screen event handler received three arguments (app, mouseX, and mouseY), but the function was defined with only two parameters. Change the definition to:
+
+def start_onMousePress(app, mouseX, mouseY):
+
+The existing click logic can stay the same. Run the app again and click the button; if it still errors, share the new traceback.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+TypeError: start_onMousePress() takes 2 positional arguments but 3 were given i got this error. how can i go about fixing this?
+
+The attachment showed this handler:
+
+def start_onMousePress(mouseX,mouseY):
+	if((mouseX>=100 and mouseX<=300) and (mouseY>=180 and mouseY<=260)):
+		setActiveScreen("game")
+
+Response:
+
+The screen event handler receives three arguments: app, mouseX, and mouseY. The function only declares the two mouse coordinates, so Python raises the argument-count error. Change the function definition to:
+
+def start_onMousePress(app, mouseX, mouseY):
+
+The existing click logic can stay the same. Run the app again and click the button; if it still errors, share the new traceback.
+###############################################

@@ -17,6 +17,16 @@ Date: 4-Oct
 Start Time: 5:32pm
 End Time: 6:05 pm
 Duratio; 33 minutes
-Description: Spent time thinking about project and brainstorming ideas (a game? or using pytorch models and computer vision? or maybe a stock market simulator? or a rubiks cube solving platform?) I think I'm probably going to settle on making a rubiks cube solving platform.
+Description: Spent time thinking about project and brainstorming ideas (a game? or using pytorch models and computer vision? or maybe a stock market simulator? or a rubiks cube solving platform?) I think I'm probably going to settle on making a stock market simulator.
 ###############################################
+
+###############################################
+Date: 5-Oct
+Start Time: 2:15pm
+End time: 3:31pm
+Duration: 76 minutes
+Description: Spent lots of time finding a stock market api, and building out a basic outline for my app. Added a button to start the stock market game, as well as two screens; one for the game and one for the home screen.
+###############################################
+
+
 
