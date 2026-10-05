@@ -1,5 +1,5 @@
 ###############################################
-Total Time: 0 minutes
+Total Time: 33 minutes
 ###############################################
 
 example:
@@ -15,8 +15,8 @@ Description: Blue-sky thinking about project.
 ###############################################
 Date: 4-Oct
 Start Time: 5:32pm
-End Time: 
-Duration; 
-Description: 
+End Time: 6:05 pm
+Duratio; 33 minutes
+Description: Spent time thinking about project and brainstorming ideas (a game? or using pytorch models and computer vision? or maybe a stock market simulator? or a rubiks cube solving platform?) I think I'm probably going to settle on making a rubiks cube solving platform.
 ###############################################
 

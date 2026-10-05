@@ -1,7 +1,14 @@
 Place your citations here
 
+example:
 ###############################################
 Source: YouTube
 Description: I used a video of a panda sliding down a snow-covered hill.
 ###############################################
+
+###############################################
+Source: https://academy.cs.cmu.edu/docs
+Desc: Used to learn the CMU graphics library -> I had barely any knowledge of this beforehand
+###############################################
+
 
