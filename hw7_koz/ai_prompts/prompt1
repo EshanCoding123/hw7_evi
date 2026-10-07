@@ -111,3 +111,19 @@ def start_onMousePress(app, mouseX, mouseY):
 
 The existing click logic can stay the same. Run the app again and click the button; if it still errors, share the new traceback.
 ###############################################
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+i used game_onkeypress, but it seems like the pause feature doesnt work. why is this the case
+
+Response:
+
+The pause check is in the wrong place. In game_onStep, app.time+=6 runs before if(app.paused): return, so time keeps advancing while the game is paused. The p key handler itself is fine. Move the pause check to the top of game_onStep, before the time increment:
+
+def game_onStep(app):
+    if(app.paused):
+        return
+    app.time+=6
+
+Related issues noted but not changed: drawLabel("Game Over!") inside onStep will not display because drawing only works in redrawAll, and app.time==1440 is an exact match that would be safer as >=.
+###############################################
