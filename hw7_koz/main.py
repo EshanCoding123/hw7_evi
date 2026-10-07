@@ -1,19 +1,25 @@
 from cmu_graphics import *
 import requests
- 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key=os.getenv("TICKER_API_KEY")
 
 #start screen code
 def onAppStart(app):
     app.background="black"
     
-    # import requests
+    #import requests
 
-    # url = "https://api.tickerbot.io/v2/tickers/AAPL"
-    # headers = { "Authorization": "Bearer tb_live_pP36XqCUJKMQVot6IaLyrH5oGWtdiTVQYnpwIqtAWaQ" }
+    #url = "https://api.tickerbot.io/v2/tickers/AAPL"
+    #headers = { "Authorization": f"Bearer {api_key}" }
 
-    # r = requests.get(url, headers=headers)
-    # r.raise_for_status()
-    # print(r.json())
+    #r = requests.get(url, headers=headers)
+    #r.raise_for_status()
+    #print(r.json())
+
 def start_redrawAll(app):
     drawLabel('Welcome to PocketStocks!', 200,50, font='monospace',fill='green', 
               align='center', bold=True, size=13)
@@ -37,7 +43,7 @@ def start_onMousePress(app,mouseX,mouseY):
 #game code
 def game_redrawAll(app):
     drawLabel("hello world",200,50,fill='green',align='center',bold=True,size=13)
-
+    drawLabel("Current Score: ")
 
 #onStep() for calling live stock ticker API results
 #def 
