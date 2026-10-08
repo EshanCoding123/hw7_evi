@@ -22,7 +22,7 @@ RULE = rgb(219, 228, 218)
 #start screen code
 def onAppStart(app):
     app.background="black"
-    app.money=10000
+    app.money=500000
     app.time=480
     app.stepsPerSecond=1 
     app.date=0
@@ -47,7 +47,7 @@ def onAppStart(app):
     
 def resetValues(app):
     app.background="black"
-    app.money=10000
+    app.money=500000
     app.time=480
     app.stepsPerSecond=1 
     app.date=0
@@ -80,7 +80,7 @@ def start_redrawAll(app):
     for x, y in chartPoints:
         drawCircle(x, y, 3, fill=WHITE)
 
-    drawLabel("Start with $10,000", 200, 169, fill=INK,
+    drawLabel("Start with $500,000", 200, 169, fill=INK,
               font='monospace', bold=True, size=14)
     drawRect(100, 190, 200, 70, fill=GREEN)
     drawRect(100, 190, 200, 70, fill=None, border=INK, borderWidth=2)
