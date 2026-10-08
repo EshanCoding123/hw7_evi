@@ -9,6 +9,16 @@ load_dotenv()
 
 api_key=os.getenv("TICKER_API_KEY")
 
+PAGE = rgb(244, 247, 241)
+INK = rgb(24, 43, 38)
+MUTED = rgb(100, 119, 108)
+GREEN = rgb(20, 121, 92)
+MINT = rgb(218, 238, 226)
+LIME = rgb(213, 235, 120)
+CORAL = rgb(201, 83, 67)
+WHITE = rgb(255, 255, 252)
+RULE = rgb(219, 228, 218)
+
 #start screen code
 def onAppStart(app):
     app.background="black"
@@ -50,43 +60,101 @@ def resetValues(app):
     app.possessions=dict()
 
 def start_redrawAll(app):
-    drawLabel('Welcome to PocketStocks!', 200,50, font='monospace',fill='green', 
-              align='center', bold=True, size=13)
-    drawLabel("$10,000 to start, and 7 days to make lots of money.",200,65,font='monospace',fill='green',align='center',bold=True,size=12)
-    drawLabel(" You have the freedom to invest in ANY volatile stock.",200,80,font='monospace',fill='green',align='center',bold=True,size=12)
-    drawLabel(" Will you survive? or go bankrupt?.",200,95,font='monospace',fill='green',align='center',bold=True,size=13)
-    drawLabel(" The choice is yours.",200,110,fill='green',font='monospace',align='center',bold=True,size=13)
-    
-    drawRect(100, 180, 200, 80, fill='green')
-    drawLabel("Press this button to",200, 210, align='center', font='monospace', bold=True,size=13)
-    drawLabel("begin the game!", 200, 225, align='center', font='monospace',bold=True,size=13)
+    drawRect(0, 0, 400, 400, fill=PAGE)
+    drawRect(0, 0, 400, 155, fill=INK)
+    drawLabel("POCKET / STOCKS", 24, 24, align='left', fill=LIME,
+              font='monospace', bold=True, size=11)
+    drawLabel("PocketStocks", 24, 57, align='left', fill=WHITE,
+              font='monospace', bold=True, size=26)
+    drawLabel("One Week to Buy and Sell.", 24, 83, align='left', fill=MINT,
+              font='monospace', size=13)
+    drawLabel("BUY LOW", 24, 126, align='left', fill=WHITE,
+              font='monospace', bold=True, size=10)
+    drawLabel("SELL HIGH", 105, 126, align='left', fill=LIME,
+              font='monospace', bold=True, size=10)
+    chartPoints = [(260, 108), (282, 94), (304, 101), (326, 72),
+                   (348, 82), (374, 50)]
+    for index in range(len(chartPoints) - 1):
+        drawLine(*chartPoints[index], *chartPoints[index + 1],
+                 fill=LIME, lineWidth=3)
+    for x, y in chartPoints:
+        drawCircle(x, y, 3, fill=WHITE)
+
+    drawLabel("Start with $10,000", 200, 169, fill=INK,
+              font='monospace', bold=True, size=14)
+    drawRect(100, 190, 200, 70, fill=GREEN)
+    drawRect(100, 190, 200, 70, fill=None, border=INK, borderWidth=2)
+    drawLabel("START TRADING", 200, 225, align='center', fill=WHITE,
+              font='monospace', bold=True, size=16)
+    drawLabel("Build a portfolio and achieve your dreams.", 200, 291,
+              align='center', fill=MUTED, font='monospace', size=11)
+    drawLine(24, 330, 376, 330, fill=RULE, lineWidth=1)
+    drawLabel("7 DAYS", 24, 351, align='left', fill=GREEN,
+              font='monospace', bold=True, size=12)
+    drawLabel("REAL LIFE TICKER PRICES - SIMULATED VOLATILITY", 376, 351,
+              align='right', fill=MUTED, font='monospace', size=9)
     
     #here i just added the rectangle and label inside and use onmousepress to simulate it as a button to start the game
 def start_onMousePress(app,mouseX,mouseY):
-    if((mouseX>=100 and mouseX<=300) and (mouseY>=180 and mouseY<=260)):
+    if((mouseX>=100 and mouseX<=300) and (mouseY>=190 and mouseY<=260)):
         setActiveScreen("game") #begin game
 
 #add information section with information regarding time increments?
 
 #game code
 def game_redrawAll(app):
-    drawRect(50, 100, 300, 80, fill='green')
-    drawRect(50, 200, 300, 80, fill='green')
-    drawLabel(f"Current Money: ${app.money:.2f}",25,25,fill='green', bold=True, font='monospace',align='left',size=20 )
-    drawLabel(f"Current Time (Hrs): {app.time/60} | Day {app.date}",25,50,fill='green', bold=True, font='monospace',align='left',size=12 )
-    drawLabel(f"P -> Pause | E -> Exit Game (will lose progress)", 25,75, fill='green',bold=True,font='monospace',align='left',size=12)
-    
-    drawLabel("Press B to browse stocks!",200,140,fill='black',bold=True,font='monospace',align='center',size=15)
-    #(only a ticker symbol will be accepted -> ex. AAPL or NVDA)
-    drawLabel("Press C to display current stock portfolio!",200,240,fill='black',bold=True,font='monospace',align='center',size=11)
-    drawLabel("Note: stocks are real market price the moment you open them;",200,300,fill='green',bold=True,font='monospace',align='center',size=10)
-    #afterwards volatility is simulated
-    drawLabel("Afterwards, volatility is simulated.",200,315,fill='green',bold=True,font='monospace',align='center',size=12)
-    if(app.gameOver):
-        drawLabel("Game Over!",200,50,fill='red',bold=True,font='monospace',align='center',size=30)
-        drawLabel("Press E to go back to the main screen.",200,75,fill='red',bold=True,font='monospace',align='center',size=20)
-    if(app.paused):
-        drawLabel("Game Paused!",200,200,fill='blue',bold=True,font='monospace',align='center',size=30)    
+    drawRect(0, 0, 400, 400, fill=PAGE)
+    drawRect(0, 0, 400, 86, fill=INK)
+    drawLabel("POCKET / STOCKS", 18, 22, align='left', fill=LIME,
+              font='monospace', bold=True, size=10)
+    drawLabel("MARKET SESSION", 18, 54, align='left', fill=WHITE,
+              font='monospace', bold=True, size=17)
+    drawRect(294, 15, 90, 55, fill=GREEN)
+    drawLabel(f"DAY {app.date + 1} / 7", 339, 34, fill=WHITE,
+              font='monospace', bold=True, size=12)
+    drawLabel(f"{app.time // 60:02d}:{app.time % 60:02d}", 339, 54,
+              fill=MINT, font='monospace', size=11)
+
+    drawRect(16, 103, 368, 76, fill=WHITE)
+    drawLabel("AVAILABLE CASH", 31, 124, align='left', fill=MUTED,
+              font='monospace', bold=True, size=10)
+    drawLabel(f"${app.money:,.2f}", 31, 154, align='left', fill=INK,
+              font='monospace', bold=True, size=24)
+    drawLabel("P  pause     E  exit", 369, 164, align='right', fill=MUTED,
+              font='monospace', size=9)
+
+    drawRect(16, 198, 176, 100, fill=GREEN)
+    drawLabel("B", 34, 225, align='left', fill=LIME,
+              font='monospace', bold=True, size=23)
+    drawLabel("BROWSE", 34, 254, align='left', fill=WHITE,
+              font='monospace', bold=True, size=15)
+    drawLabel("Find a ticker", 34, 279, align='left', fill=MINT,
+              font='monospace', size=10)
+    drawRect(208, 198, 176, 100, fill=INK)
+    drawLabel("C", 226, 225, align='left', fill=LIME,
+              font='monospace', bold=True, size=23)
+    drawLabel("PORTFOLIO", 226, 254, align='left', fill=WHITE,
+              font='monospace', bold=True, size=15)
+    drawLabel("Review positions", 226, 279, align='left', fill=MINT,
+              font='monospace', size=10)
+    drawLine(16, 323, 384, 323, fill=RULE, lineWidth=1)
+    drawLabel("LIVE LOOKUP", 18, 346, align='left', fill=GREEN,
+              font='monospace', bold=True, size=10)
+    drawLabel("Prices update with simulated market movement.", 18, 367,
+              align='left', fill=MUTED, font='monospace', size=10)
+
+    if app.gameOver or app.paused:
+        drawRect(46, 151, 308, 104, fill=WHITE, border=GREEN, borderWidth=2)
+        if app.gameOver:
+            drawLabel("SESSION COMPLETE", 200, 187, fill=CORAL,
+                      font='monospace', bold=True, size=17)
+            drawLabel("Press E to return to the start screen", 200, 220,
+                      fill=INK, font='monospace', size=10)
+        else:
+            drawLabel("PAUSED", 200, 187, fill=GREEN,
+                      font='monospace', bold=True, size=20)
+            drawLabel("Press P to resume", 200, 220,
+                      fill=INK, font='monospace', size=11)
 #user inputs stock ticker symbol
 #api pulls stock data -> you should go to a new screen 
 def game_onKeyPress(app,key):
@@ -150,29 +218,39 @@ def fetchStocks(app):
         app.apiError=True
 #stock search screen
 def results_redrawAll(app):
+    drawRect(0, 0, 400, 400, fill=PAGE)
+    drawRect(0, 0, 400, 76, fill=INK)
+    drawLabel("STOCK FINDER", 18, 25, align='left', fill=WHITE,
+              font='monospace', bold=True, size=17)
+    drawLabel("T  ticker details / buy      E  back", 18, 53,
+              align='left', fill=MINT, font='monospace', size=10)
     if app.apiError:
-        drawLabel("Could not load stock data", 200, 200, fill='red', font='monospace')
+        drawRect(28, 145, 344, 100, fill=WHITE)
+        drawLabel("Could not load stock data", 200, 187, fill=CORAL,
+                  font='monospace', bold=True, size=14)
+        drawLabel("Check your connection and try again.", 200, 215,
+                  fill=MUTED, font='monospace', size=10)
         return
     if(app.stocks==[]):
         setActiveScreen("game")
     for i, s in enumerate(app.stocks):
-        y = 70 + i * 25 - app.scroll
-        drawLabel(s["ticker"], 20, y, align='left', fill='green', bold=True, font='monospace')
-        drawLabel(s["name"][:28], 90, y, align='left', fill='green', font='monospace', size=11)
-    # header drawn last so scrolled rows are hidden behind it
-    drawRect(0, 0, 400, 55, fill='black')
-    drawLabel("Results (Up/Down to scroll)", 200, 30, fill='green', bold=True, font='monospace', size=16)
-    drawLabel("Press T to input a ticker and see price info", 200, 40, fill='green',align='center', bold=True, font='monospace', size=11)
-    drawLabel("Press E to exit to game", 200, 50, fill='green',align='center', bold=True, font='monospace', size=11)
+        y = 94 + i * 34 - app.scroll
+        if y < 82 or y > 390:
+            continue
+        drawLabel(s["ticker"], 20, y, align='left', fill=GREEN,
+                  bold=True, font='monospace', size=12)
+        drawLabel(s["name"][:31], 100, y, align='left', fill=INK,
+                  font='monospace', size=10)
+        drawLine(18, y + 15, 382, y + 15, fill=RULE, lineWidth=1)
 
 
 #know how to explain this part
 def results_onKeyPress(app, key):
-    maxScroll = max(0, len(app.stocks) * 25 - 320)
+    maxScroll = max(0, len(app.stocks) * 34 - 300)
     if key == 'down':
-        app.scroll = min(maxScroll, app.scroll + 25)
+        app.scroll = min(maxScroll, app.scroll + 34)
     elif key == 'up':
-        app.scroll = max(0, app.scroll - 25)
+        app.scroll = max(0, app.scroll - 34)
     elif key=='e':
         setActiveScreen("game")
     elif key=='t':
@@ -244,7 +322,7 @@ def buyTicker(app):
         holding['history'] = holding['history'][-40:]
     app.money -= (price*quantity)
 
-def drawHoldingGraph(history, x, y, width, height):
+def drawHoldingGraph(history, x, y, width, height, color=GREEN):
     if len(history) < 2:
         return
     low = min(history)
@@ -258,41 +336,55 @@ def drawHoldingGraph(history, x, y, width, height):
         pointY = y + height - (price - low) * height / valueRange
         points.append((pointX, pointY))
     for index in range(len(points) - 1):
-        drawLine(*points[index], *points[index + 1], fill='green', lineWidth=2)
+        drawLine(*points[index], *points[index + 1], fill=color, lineWidth=2)
 
 def portfolio_redrawAll(app):
     totalValue = sum(holding['shares'] * holding['currentPrice'] for holding in app.possessions.values())
-    drawLabel("Portfolio", 200, 22, fill='green', bold=True, font='monospace', size=18)
-    drawLabel(f"Cash: ${app.money:,.2f}   Holdings: ${totalValue:,.2f}", 200, 44, fill='green', font='monospace', size=11)
-    drawLabel("E: back   S: sell   Up/Down: scroll", 200, 59, fill='green',font='monospace', size=10)
+    drawRect(0, 0, 400, 400, fill=PAGE)
+    drawRect(0, 0, 400, 70, fill=INK)
+    drawLabel("YOUR PORTFOLIO", 18, 23, align='left', fill=WHITE,
+              bold=True, font='monospace', size=17)
+    drawLabel(f"CASH  ${app.money:,.2f}", 18, 50, align='left',
+              fill=LIME, font='monospace', bold=True, size=11)
+    drawLabel(f"INVESTED  ${totalValue:,.2f}", 382, 50, align='right',
+              fill=MINT, font='monospace', bold=True, size=11)
+    drawLabel("E back     S sell     UP / DOWN scroll", 200, 84,
+              fill=MUTED, font='monospace', size=9)
 
     if not app.possessions:
-        drawLabel("No stocks owned yet", 200, 200, fill='green',
-                  font='monospace', size=16)
+        drawRect(24, 145, 352, 112, fill=WHITE)
+        drawLabel("No positions yet", 200, 190, fill=INK,
+                  font='monospace', bold=True, size=16)
+        drawLabel("Browse stocks to make your first trade.", 200, 220,
+                  fill=MUTED, font='monospace', size=10)
         return
 
     for index, (ticker, holding) in enumerate(app.possessions.items()):
-        y = 75 + index * 64 - app.portfolioScroll
-        if y + 58 < 70 or y > 400:
+        y = 99 + index * 72 - app.portfolioScroll
+        if y + 66 < 93 or y > 400:
             continue
         averageCost = holding['costBasis'] / holding['shares']
         currentValue = holding['shares'] * holding['currentPrice']
         profit = currentValue - holding['costBasis']
-        drawLabel(f"{ticker}  x{holding['shares']}", 15, y + 12,
-                  align='left', fill='green', bold=True, font='monospace', size=13)
-        drawLabel(f"${holding['currentPrice']:,.2f}  avg ${averageCost:,.2f}",
-                  15, y + 31, align='left', fill='green', font='monospace', size=10)
-        drawLabel(f"P/L ${profit:+,.2f}", 15, y + 48, align='left',
-                  fill='green' if profit >= 0 else 'red', font='monospace', size=10)
-        drawHoldingGraph(holding['history'], 205, y + 8, 175, 42)
-        drawLine(12, y + 61, 388, y + 61, fill='darkGreen')
+        drawRect(14, y, 372, 66, fill=WHITE)
+        drawLabel(ticker, 25, y + 17, align='left', fill=INK,
+                  bold=True, font='monospace', size=14)
+        drawLabel(f"{holding['shares']:g} shares  /  avg ${averageCost:,.2f}",
+                  25, y + 43, align='left', fill=MUTED, font='monospace', size=9)
+        graphColor = GREEN if profit >= 0 else CORAL
+        drawHoldingGraph(holding['history'], 190, y + 13, 108, 38, graphColor)
+        drawLabel(f"${holding['currentPrice']:,.2f}", 370, y + 20,
+                  align='right', fill=INK, font='monospace', bold=True, size=11)
+        drawLabel(f"P/L {profit:+,.2f}", 370, y + 43, align='right',
+                  fill=GREEN if profit >= 0 else CORAL,
+                  font='monospace', bold=True, size=9)
 
 def portfolio_onKeyPress(app, key):
-    maxScroll = max(0, len(app.possessions) * 64 - 320)
+    maxScroll = max(0, len(app.possessions) * 72 - 285)
     if key == 'down':
-        app.portfolioScroll = min(maxScroll, app.portfolioScroll + 64)
+        app.portfolioScroll = min(maxScroll, app.portfolioScroll + 72)
     elif key == 'up':
-        app.portfolioScroll = max(0, app.portfolioScroll - 64)
+        app.portfolioScroll = max(0, app.portfolioScroll - 72)
     elif key == 'e':
         setActiveScreen('game')
     elif key == 's':
