@@ -1,16 +1,6 @@
 ###############################################
-Total Time: 33 minutes
+Total Time: 318 minutes
 ###############################################
-
-example:
-###############################################
-Date: 23-Sep
-Start Time: 9:30am
-End Time: 10:45am
-Duration; 75 minutes
-Description: Blue-sky thinking about project.
-###############################################
-
 
 ###############################################
 Date: 4-Oct
@@ -39,9 +29,9 @@ Description: Spent lots of time constructing basic game logic and creating the s
 ###############################################
 Date: 7-Oct
 Start Time: 9:35pm
-End time: 
-Duration: 99 minutes
-Description: Spent lots of time constructing basic game logic and creating the shell of the game. Now, I need to implement the actual stock market logic.
+End time: 12:08AM
+Duration: 110 minutes (took a break in between)
+Description: I did alot of work today! I finished the stock listings and made it so that a user can buy new stocks. I tested the app alot and I was able to implement cool features. Tomorrow, I will probably be able to finish up and add the features for stock volatility price updating as well as graphs for viewing one's own portfolio.
 ###############################################
 
 

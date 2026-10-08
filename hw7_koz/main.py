@@ -207,7 +207,7 @@ def buyTicker(app):
     print(app.possessions) #tester
     
     
-
+#TO_DOs 10/8/26 -> current portfolio screen with graphs, and stock price update engine!
 #current portfolio screen
 
     #this is where you continuously update the stock value

@@ -127,3 +127,169 @@ def game_onStep(app):
 
 Related issues noted but not changed: drawLabel("Game Over!") inside onStep will not display because drawing only works in redrawAll, and app.time==1440 is an exact match that would be safer as >=.
 ###############################################
+
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+'app' object has no attribute 'activeScreen'
+
+Response:
+
+The error comes from mixing two CMU Graphics modes. Label(...) is a shape from the shapes API, which does not work with an app that uses runAppWithScreens and redrawAll functions. Also, drawLabel(app.gameOverLabel) is invalid. Replace the Label with a flag: set app.gameOver=False in onAppStart, set app.gameOver=True in game_onStep when app.date==7, and in game_redrawAll use "if(app.gameOver): drawLabel("Game Over!", ...)". Note that app.date was set to 7 in onAppStart, so "Game Over!" shows immediately; set it back to 0 for normal play.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+can i add as many screens as i want?
+
+Response:
+
+Yes. With runAppWithScreens, each screen is a name prefix on your handlers, for example start_redrawAll, game_redrawAll, game_onKeyPress, shop_redrawAll. Switch between them with setActiveScreen("shop"). Each screen needs its own <name>_redrawAll; other handlers are optional. onAppStart is shared by all screens, so keep shared state like app.money there.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+can i have an OnStep method that runs continuously in the background no matter the tab
+
+Response:
+
+Yes. Define a plain onStep(app) with no screen prefix; it runs on every step regardless of the active screen, while a screen-specific game_onStep only runs while that screen is active. Example:
+
+def onStep(app):
+    if app.paused:
+        return
+    app.time += 6
+    if app.time >= 1440:
+        app.time = 0
+        app.date += 1
+    if app.date >= 7:
+        app.gameOver = True
+
+Move the time and day logic from game_onStep into this function so the clock keeps running on other screens. Keep game_onStep for logic that should run only while the game screen is showing.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+is there a way to cleanly display the output of the api and each stock on the results screen?
+
+Response:
+
+Yes. Fetch the data once, store it on app, and have the results screen loop over it. Do not call the API inside redrawAll because it runs many times per second. Example:
+
+def fetchStocks(app):
+    try:
+        r = requests.get(url, headers=headers, timeout=5)
+        r.raise_for_status()
+        app.stocks = [(s["ticker"], s["price"]) for s in r.json()]
+    except requests.RequestException:
+        app.stocks = []
+        app.apiError = True
+
+def results_redrawAll(app):
+    for i, (ticker, price) in enumerate(app.stocks):
+        y = 70 + i * 25
+        drawLabel(ticker, 40, y, align='left', fill='green', bold=True, font='monospace')
+        drawLabel(f"${price:,.2f}", 360, y, align='right', fill='green', font='monospace')
+
+Tips: fetch on a trigger such as a key press or screen switch, left-align the ticker and right-align the price, use a scroll offset for many stocks, initialize app.stocks and app.apiError in onAppStart, and keep API calls infrequent because requests.get blocks the window.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+(Pasted a JSON search response containing "as_of", "count", "next_cursor", and a "results" list of tickers such as AAPL, AAPX, AAPY, APLE, DPS, DPSw, MLP, PAPL, PEGY, each with ticker, name, exchange, active, list_date, delisted_utc, etc.)
+
+this is what the json looks like. how can i read this
+
+Response:
+
+The stocks are in the "results" list, so r.json()["results"] gives a list of dicts, one per stock, read by key:
+
+data = r.json()
+for stock in data["results"]:
+    print(stock["ticker"], stock["name"], stock["exchange"])
+
+Things to watch: inactive stocks (DPS, DPSw, PEGY have "active": false) can be filtered out; exchange and list_date can be None, so use stock.get("exchange") or "N/A"; and this response has no prices, so a separate prices endpoint is needed. For the results screen:
+
+def fetchStocks(app):
+    r = requests.get(url, headers=headers, timeout=5)
+    r.raise_for_status()
+    app.stocks = [
+        {"ticker": s["ticker"], "name": s["name"], "exchange": s.get("exchange") or "N/A"}
+        for s in r.json()["results"]
+        if s["active"]
+    ]
+
+def results_redrawAll(app):
+    for i, s in enumerate(app.stocks):
+        y = 70 + i * 25
+        drawLabel(s["ticker"], 20, y, align='left', fill='green', bold=True, font='monospace')
+        drawLabel(s["name"][:28], 90, y, align='left', fill='green', font='monospace', size=11)
+
+The name is cut to 28 characters so long names do not run off the screen.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+the data is going off the screen. is there a way for me to scroll down so that i can see all of the listed stocks?
+
+Response:
+
+Added scrolling to the results screen with the Up and Down arrow keys, 25 pixels (one row) per press. app.scroll shifts every row's y position and resets to 0 on each new search and in resetValues. results_onKeyPress clamps the offset between 0 and (number of stocks * 25 - 320). A black header bar with the title is drawn after the rows so scrolled rows are hidden behind it. Suggested adding an 'e' or 'escape' key in results_onKeyPress to go back to the game screen.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+(Pasted a single-ticker JSON response for AAPL with fields such as name, exchange, sector, industry, market_cap, price, change_1d_pct, volume_today, relative_volume, pe_ratio, eps, high_52w, low_52w, rsi_14.)
+
+this is the format of a specific ticker response. in the buyTicker method, can you output the important data from this to the user in another response prompt, and then ask the user whether they want to buy this stock or not
+
+Response:
+
+Rewrote buyTicker: it uses app.getTextInput for the ticker instead of input() (input() waits in the terminal and freezes the window), requests /tickers/{TICKER} and reads r.json()["data"], shows the name, exchange, sector, industry, price and 1-day change, 52-week range, market cap, P/E, EPS, RSI, and volume with a message box, then asks a Y/N question to buy. On Y the stock data is saved to app.selectedStock. A bad ticker or network failure shows a message and returns. Buying itself (subtracting money, adding to a portfolio) was not implemented at that point. Also noted the two help labels in results_redrawAll were both drawn at y=40 and overlapped.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+can you show the message in the same box as the getTextInput box?
+
+Response:
+
+Combined the stock summary and the "Buy AAPL at $304.77? (Y/N)" question into a single multi-line app.getTextInput prompt and removed the separate showMessage box.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot (with an attached main.py file):
+
+how can i catch the typeerror because there are null values in one of the dictionaries for a ticker. I tried catching this but its not working line 180
+
+Response:
+
+The try never caught anything because print("good") cannot raise a TypeError. The error happens where the message text is built: a format spec such as {d['market_cap']:,} or {d['price']:,.2f} fails when the value is None. Moved the try/except TypeError around the f-string that builds the prompt, showing "Please choose a different stock. Some information is not available for this stock." and returning. Also noted that the purchase logic after the confirmation is not indented under the 'y' check (so it runs even on N), the not-enough-money message does not return, and app.possessions must be initialized in onAppStart/resetValues.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+can you please put all our past chats in the ai prompts text file. thank you.
+
+Response:
+
+Appended every earlier chat in this conversation (the 'activeScreen' error, adding multiple screens, a background onStep, displaying API results, reading the search JSON, scrolling, the ticker detail and buy prompt, the combined text box, and the TypeError fix) as separate entries in the ai_prompts file. The pasted JSON samples were shortened to a one-line description and the responses were condensed rather than copied word for word.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+also put this message and the most recent one as well
+
+Response:
+
+Appended the previous request ("can you please put all our past chats in the ai prompts text file") and this request as entries in the ai_prompts file.
+###############################################
