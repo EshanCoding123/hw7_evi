@@ -175,17 +175,22 @@ def buyTicker(app):
         app.showMessage(f"Could not load data for '{response}'.")
         return
 
-    answer = app.getTextInput(
-        f"{d['name']} ({d['ticker']}) - {d['exchange']}\n"
-        f"Sector: {d.get('sector')} | {d.get('industry')}\n"
-        f"Price: ${d['price']:,.2f} ({d['change_1d_pct']*100:+.2f}% today)\n"
-        f"52w range: ${d['low_52w']:,.2f} - ${d['high_52w']:,.2f}\n"
-        f"Market cap: ${d['market_cap']:,}\n"
-        f"P/E: {d.get('pe_ratio')} | EPS: {d.get('eps')}\n"
-        f"RSI(14): {d.get('rsi_14')}\n"
-        f"Volume: {d['volume_today']:,} (rel. {d.get('relative_volume')}x)\n\n"
-        f"Buy {d['ticker']} at ${d['price']:,.2f}? (Y/N)"
-    )
+    try:
+        prompt = (
+            f"{d['name']} ({d['ticker']}) - {d['exchange']}\n"
+            f"Sector: {d.get('sector')} | {d.get('industry')}\n"
+            f"Price: ${d['price']:,.2f} ({d['change_1d_pct']*100:+.2f}% today)\n"
+            f"52w range: ${d['low_52w']:,.2f} - ${d['high_52w']:,.2f}\n"
+            f"Market cap: ${d['market_cap']:,}\n"
+            f"P/E: {d.get('pe_ratio')} | EPS: {d.get('eps')}\n"
+            f"RSI(14): {d.get('rsi_14')}\n"
+            f"Volume: {d['volume_today']:,} (rel. {d.get('relative_volume')}x)\n\n"
+            f"Buy {d['ticker']} at ${d['price']:,.2f}? (Y/N)"
+        )
+    except TypeError:
+        app.showMessage("Please choose a different stock. Some information is not available for this stock.")
+        return #I noticed during testing that one of the stocks in an api call returned "null" values, so I used this try-except statement to account for that.
+    answer = app.getTextInput(prompt)
     
     if answer and answer.strip().lower() == 'y':
         app.selectedStock = d
