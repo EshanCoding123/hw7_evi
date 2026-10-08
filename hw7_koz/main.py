@@ -52,7 +52,7 @@ def resetValues(app):
 def start_redrawAll(app):
     drawLabel('Welcome to PocketStocks!', 200,50, font='monospace',fill='green', 
               align='center', bold=True, size=13)
-    drawLabel("$10,000 to start, and 7 days to reach 100,000 dollars.",200,65,font='monospace',fill='green',align='center',bold=True,size=12)
+    drawLabel("$10,000 to start, and 7 days to make lots of money.",200,65,font='monospace',fill='green',align='center',bold=True,size=12)
     drawLabel(" You have the freedom to invest in ANY volatile stock.",200,80,font='monospace',fill='green',align='center',bold=True,size=12)
     drawLabel(" Will you survive? or go bankrupt?.",200,95,font='monospace',fill='green',align='center',bold=True,size=13)
     drawLabel(" The choice is yours.",200,110,fill='green',font='monospace',align='center',bold=True,size=13)
@@ -116,7 +116,7 @@ def advanceGame(app):
         app.gameOver=True
         return
     elif(app.time>=1200):
-        app.time=0
+        app.time=8
         app.date+=1
 
 def updateStockPrices(app):
@@ -187,7 +187,7 @@ def buyTicker(app):
         headers = { "Authorization": f"Bearer {api_key}" }
         r = requests.get(url, headers=headers, timeout=5)
         r.raise_for_status() #api call to get ticker information
-        d = r.json()["data"]
+        d = r.json()["data"] #there is a specific ["data"] key in the json file that has all the actual ticker information (display format of json here to explain)
     except (requests.RequestException, KeyError, ValueError):
         app.showMessage(f"Could not load data for '{response}'.")
         return
@@ -264,7 +264,7 @@ def portfolio_redrawAll(app):
     totalValue = sum(holding['shares'] * holding['currentPrice'] for holding in app.possessions.values())
     drawLabel("Portfolio", 200, 22, fill='green', bold=True, font='monospace', size=18)
     drawLabel(f"Cash: ${app.money:,.2f}   Holdings: ${totalValue:,.2f}", 200, 44, fill='green', font='monospace', size=11)
-    drawLabel("E: back   Up/Down: scroll", 200, 59, fill='green',font='monospace', size=10)
+    drawLabel("E: back   S: sell   Up/Down: scroll", 200, 59, fill='green',font='monospace', size=10)
 
     if not app.possessions:
         drawLabel("No stocks owned yet", 200, 200, fill='green',
@@ -295,10 +295,57 @@ def portfolio_onKeyPress(app, key):
         app.portfolioScroll = max(0, app.portfolioScroll - 64)
     elif key == 'e':
         setActiveScreen('game')
-    elif key=='s':
-        #sell stocks
-        response=app.getTextInput("Input your ticker symbol for the stock your would like to sell (ex. AAPL)")
-        
+    elif key == 's':
+        sellStock(app)
+
+
+#make sure you understand how this works
+def sellStock(app):
+    if not app.possessions:
+        app.showMessage("You do not own any stocks to sell.")
+        return
+
+    response = app.getTextInput("Enter the ticker symbol you would like to sell:")
+    if not response or not response.strip():
+        return
+    ticker = response.strip().upper() #entering ticker symbol
+    holding = app.possessions.get(ticker) #corresponding holding for the inputted ticker that the user inputs
+    if holding is None:
+        app.showMessage(f"You do not own {ticker}.") 
+        return
+
+    quantityResponse = app.getTextInput(
+        f"How many shares of {ticker} would you like to sell? "
+        f"You own {holding['shares']:g}."
+    ) #response box for user to input their shares
+    
+    if not quantityResponse:
+        return #if no response
+    
+    #try/except to ensure that user inputs a valid number
+    try:
+        quantity = float(quantityResponse)
+    except (TypeError, ValueError):
+        app.showMessage("Enter a valid number of shares.")
+        return
+    
+    if not math.isfinite(quantity) or quantity <= 0:
+        app.showMessage("Enter a positive number of shares.")
+        return #positive number of shares
+    if quantity > holding['shares']:
+        app.showMessage(f"You only own {holding['shares']:g} shares of {ticker}.")
+        return #catches whether a quantity is greater than the existing shares in the holding for the ticker
+
+    proceeds = quantity * holding['currentPrice'] 
+    remainingShares = holding['shares'] - quantity #updates current shares
+    if remainingShares == 0:
+        del app.possessions[ticker]
+    else:
+        remainingFraction = remainingShares / holding['shares'] #explain this
+        holding['shares'] = remainingShares #updates shares
+        holding['costBasis'] *= remainingFraction
+    app.money += proceeds #adds the proceeds generated from selling n shares of a stock
+
 def portfolio_onStep(app):
     advanceGame(app)
 
