@@ -1,6 +1,8 @@
 from cmu_graphics import *
 import requests
 import os
+import random
+import math
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,6 +20,7 @@ def onAppStart(app):
     app.gameOver=False
     app.apiError=False
     app.scroll=0
+    app.portfolioScroll=0
     #dictionary with key->ticker and current stock value adjusted per step
     app.stocks=None
     app.possessions=dict()
@@ -43,13 +46,14 @@ def resetValues(app):
     app.apiError=False
     app.stocks=None
     app.scroll=0
+    app.portfolioScroll=0
     app.possessions=dict()
 
 def start_redrawAll(app):
     drawLabel('Welcome to PocketStocks!', 200,50, font='monospace',fill='green', 
               align='center', bold=True, size=13)
     drawLabel("$10,000 to start, and 7 days to reach 100,000 dollars.",200,65,font='monospace',fill='green',align='center',bold=True,size=12)
-    drawLabel(" You have the freedom to invest in ANY volatile stock.",200,80,font='monospace',fill='green',align='center',bold=True,size=13)
+    drawLabel(" You have the freedom to invest in ANY volatile stock.",200,80,font='monospace',fill='green',align='center',bold=True,size=12)
     drawLabel(" Will you survive? or go bankrupt?.",200,95,font='monospace',fill='green',align='center',bold=True,size=13)
     drawLabel(" The choice is yours.",200,110,fill='green',font='monospace',align='center',bold=True,size=13)
     
@@ -68,7 +72,7 @@ def start_onMousePress(app,mouseX,mouseY):
 def game_redrawAll(app):
     drawRect(50, 100, 300, 80, fill='green')
     drawRect(50, 200, 300, 80, fill='green')
-    drawLabel(f"Current Money: {app.money}",25,25,fill='green', bold=True, font='monospace',align='left',size=20 )
+    drawLabel(f"Current Money: ${app.money:.2f}",25,25,fill='green', bold=True, font='monospace',align='left',size=20 )
     drawLabel(f"Current Time (Hrs): {app.time/60} | Day {app.date}",25,50,fill='green', bold=True, font='monospace',align='left',size=12 )
     drawLabel(f"P -> Pause | E -> Exit Game (will lose progress)", 25,75, fill='green',bold=True,font='monospace',align='left',size=12)
     
@@ -96,11 +100,17 @@ def game_onKeyPress(app,key):
     elif(key=='b'):
         fetchStocks(app)
         setActiveScreen("results")
-
+    elif(key=='c'):
+        setActiveScreen("portfolio")
+    
     
 def game_onStep(app):
-    if(app.paused):
+    advanceGame(app)
+
+def advanceGame(app):
+    if app.paused or app.gameOver:
         return 
+    updateStockPrices(app)
     app.time+=6
     if(app.date==7):
         app.gameOver=True
@@ -109,7 +119,14 @@ def game_onStep(app):
         app.time=0
         app.date+=1
 
-    #stock volatility simulator
+def updateStockPrices(app):
+    for holding in app.possessions.values():
+        change = random.uniform(-0.005, 0.005)
+        holding['currentPrice'] = max(0.01, holding['currentPrice'] * (1 + change))
+        holding['history'].append(holding['currentPrice'])
+        if len(holding['history']) > 40:
+            holding['history'].pop(0)
+
 def fetchStocks(app):
     response=app.getTextInput("Which stock would you like to buy? (Ticker will make search easier (ex. AAPL))")
     app.scroll=0
@@ -191,28 +208,100 @@ def buyTicker(app):
         app.showMessage("Please choose a different stock. Some information is not available for this stock.")
         return #I noticed during testing that one of the stocks in an api call returned "null" values, so I used this try-except statement to account for that.
     answer = app.getTextInput(prompt)
-    
-    if answer and answer.strip().lower() == 'y':
-        app.selectedStock = d
-    ticker=d['ticker']
-    #dictionary logic
-    if(app.money-app.selectedStock['price']<0):
-        app.showMessage("Sorry. You do not have enough to purchase this!")
-    if(ticker in app.possessions.keys()):
-        app.money-=app.selectedStock['price']
-        app.possessions[ticker]+=app.selectedStock['price']
-    else:
-        app.money-=app.selectedStock['price']
-        app.possessions[ticker]=app.selectedStock['price']
-    print(app.possessions) #tester
-    
-    
-#TO_DOs 10/8/26 -> current portfolio screen with graphs, and stock price update engine!
-#current portfolio screen
+    quantity=app.getTextInput("How many shares would you like to buy? (enter number only)")
+    if not answer or answer.strip().lower() != 'y':
+        return
+    quantity=float(quantity)
+    if(quantity==0):
+        return
 
-    #this is where you continuously update the stock value
-    #6 minutes per sec -> 12 seconds for 1 hr -> 4.8 min 1 day 
-    
+    try:
+        price = float(d['price'])
+        ticker = d['ticker']
+    except (KeyError, TypeError, ValueError):
+        app.showMessage("This stock does not have a valid price.")
+        return
+    if not math.isfinite(price) or price <= 0:
+        app.showMessage("This stock does not have a valid price.")
+        return
+    if (app.money) < price*quantity:
+        app.showMessage("Sorry. You do not have enough to purchase this!")
+        return
+
+    holding = app.possessions.get(ticker)
+    if holding is None:
+        app.possessions[ticker] = {
+            'shares': quantity,
+            'costBasis': price*quantity,
+            'currentPrice': price,
+            'history': [price],
+        }
+    else:
+        holding['shares'] += quantity
+        holding['costBasis'] += (price*quantity)
+        holding['currentPrice'] = price
+        holding['history'].append(price)
+        holding['history'] = holding['history'][-40:]
+    app.money -= (price*quantity)
+
+def drawHoldingGraph(history, x, y, width, height):
+    if len(history) < 2:
+        return
+    low = min(history)
+    high = max(history)
+    valueRange = high - low
+    if valueRange == 0:
+        valueRange = 1
+    points = []
+    for index, price in enumerate(history):
+        pointX = x + index * width / (len(history) - 1)
+        pointY = y + height - (price - low) * height / valueRange
+        points.append((pointX, pointY))
+    for index in range(len(points) - 1):
+        drawLine(*points[index], *points[index + 1], fill='green', lineWidth=2)
+
+def portfolio_redrawAll(app):
+    totalValue = sum(holding['shares'] * holding['currentPrice'] for holding in app.possessions.values())
+    drawLabel("Portfolio", 200, 22, fill='green', bold=True, font='monospace', size=18)
+    drawLabel(f"Cash: ${app.money:,.2f}   Holdings: ${totalValue:,.2f}", 200, 44, fill='green', font='monospace', size=11)
+    drawLabel("E: back   Up/Down: scroll", 200, 59, fill='green',font='monospace', size=10)
+
+    if not app.possessions:
+        drawLabel("No stocks owned yet", 200, 200, fill='green',
+                  font='monospace', size=16)
+        return
+
+    for index, (ticker, holding) in enumerate(app.possessions.items()):
+        y = 75 + index * 64 - app.portfolioScroll
+        if y + 58 < 70 or y > 400:
+            continue
+        averageCost = holding['costBasis'] / holding['shares']
+        currentValue = holding['shares'] * holding['currentPrice']
+        profit = currentValue - holding['costBasis']
+        drawLabel(f"{ticker}  x{holding['shares']}", 15, y + 12,
+                  align='left', fill='green', bold=True, font='monospace', size=13)
+        drawLabel(f"${holding['currentPrice']:,.2f}  avg ${averageCost:,.2f}",
+                  15, y + 31, align='left', fill='green', font='monospace', size=10)
+        drawLabel(f"P/L ${profit:+,.2f}", 15, y + 48, align='left',
+                  fill='green' if profit >= 0 else 'red', font='monospace', size=10)
+        drawHoldingGraph(holding['history'], 205, y + 8, 175, 42)
+        drawLine(12, y + 61, 388, y + 61, fill='darkGreen')
+
+def portfolio_onKeyPress(app, key):
+    maxScroll = max(0, len(app.possessions) * 64 - 320)
+    if key == 'down':
+        app.portfolioScroll = min(maxScroll, app.portfolioScroll + 64)
+    elif key == 'up':
+        app.portfolioScroll = max(0, app.portfolioScroll - 64)
+    elif key == 'e':
+        setActiveScreen('game')
+    elif key=='s':
+        #sell stocks
+        response=app.getTextInput("Input your ticker symbol for the stock your would like to sell (ex. AAPL)")
+        
+def portfolio_onStep(app):
+    advanceGame(app)
+
 def main():
     runAppWithScreens(initialScreen='start')
     
