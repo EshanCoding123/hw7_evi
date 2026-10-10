@@ -286,7 +286,10 @@ def buyTicker(app):
         app.showMessage("Please choose a different stock. Some information is not available for this stock.")
         return #I noticed during testing that one of the stocks in an api call returned "null" values, so I used this try-except statement to account for that.
     answer = app.getTextInput(prompt)
-    quantity=app.getTextInput("How many shares would you like to buy? (enter number only)")
+    try:
+        quantity=app.getTextInput("How many shares would you like to buy? (enter number only)")
+    except ValueError:
+        app.showMessage("Please input a float value.")
     if not answer or answer.strip().lower() != 'y':
         return
     quantity=float(quantity)

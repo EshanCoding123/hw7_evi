@@ -293,3 +293,73 @@ Response:
 
 Appended the previous request ("can you please put all our past chats in the ai prompts text file") and this request as entries in the ai_prompts file.
 ###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+check todos 212.  can you try to code these in.
+
+Response:
+
+Implemented the portfolio and simulated stock price update TODOs. Holdings track shares, total cost basis, current per-share price, and recent price history. The portfolio screen displays each position and a small price graph. Purchases now require confirmation and sufficient funds.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+what is the costBasis variable in possessions
+
+Response:
+
+costBasis is the total amount spent on a holding, not the price of one share. It increases with each purchase. The app divides it by shares to get average purchase price, and compares it with the holding's current value to calculate profit or loss.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+what is the history key
+
+Response:
+
+history is the list of recent simulated prices for that stock. The app adds the current price to it as prices update, then uses the list to draw the portfolio graph. It keeps at most 40 prices.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+i imiplemented a way to buy a certain amount of shares for a stock, but it seems like the p/l calculation is incorrect. can you check this out  and see what I need to fix here
+
+Response:
+
+Found that new holdings initialized currentPrice as price multiplied by quantity, even though valuation treats currentPrice as a per-share price. Changed it to store price alone. With 2 shares bought at $100, value and cost basis now both start at $200; at $110 per share, P/L is +$20.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+create selling stocks feature (when the user clicks s in portfolio_onkeypress, the user inputs their ticker symbol and amount of shares. the code then changes the corresponding holdings dictionary. also draw a label neatly in the portfolio screen indicating to the user that they can press s to sell any of their holdings.)
+
+Response:
+
+Implemented selling from the portfolio with the S key. The user enters a ticker and quantity; valid sales credit cash at the current simulated price, reduce shares and cost basis proportionally, and remove fully sold positions. Added an S sell hint to the portfolio screen and validation for invalid quantities, unknown tickers, and overselling.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+alright, now is there anything you could do to make the app more visually appealing?
+
+Response:
+
+Refreshed the screens with a consistent market-journal style: warm light backgrounds, dark green headers, mint and coral accents, improved text hierarchy, and clearer spacing. Updated the start, game, results, and portfolio screens while preserving the existing controls and behavior.
+###############################################
+
+###############################################
+Prompt to GitHub Copilot:
+
+add all of these previous prompts including this one into the ai prompts text file.
+
+Response:
+
+Appended these six preceding prompts and this request, with concise corresponding responses, to the existing AI prompt transcript.
+###############################################
